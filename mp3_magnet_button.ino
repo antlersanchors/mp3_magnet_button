@@ -45,8 +45,14 @@ int triggerPins[TRIGGER_COUNT] = {0, 1, 5, 10, A0, A1, A2, A3, A4};
 int stopPin = A5; // This pin triggers a track stop.
 int lastTrigger = 0; // This variable keeps track of which tune is playing
 
+// Magnet stuff
+#define hall A0
+int sensorVal;
+
 void setup()
 {
+  Serial.begin(9600);
+
   /* Set up all trigger pins as inputs, with pull-ups activated: */
   for (int i=0; i<TRIGGER_COUNT; i++)
   {
@@ -63,6 +69,16 @@ void setup()
 //  currently playing track, and start playing a new one.
 void loop()
 {
+  sensorVal = analogRead(hall);
+
+  if (sensorVal < 200){
+    if (MP3player.isPlaying() == false){
+      uint8_t result = MP3player.playTrack(1);
+    }
+  }
+
+
+  
   for (int i=0; i<TRIGGER_COUNT; i++)
   {
     if ((digitalRead(triggerPins[i]) == LOW) && ((i+1) != lastTrigger))
