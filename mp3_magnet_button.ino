@@ -81,12 +81,11 @@ void loop()
     }
   } else {
     playState = false;
+    if (MP3player.isPlaying()){
+      MP3player.stopTrack();
+    }
   }
 
-  if (millis() > 3000){
-    uint8_t result = MP3player.playTrack(1);
-
-  }
 
   Serial.print("playState: ");
   Serial.println(playState);
