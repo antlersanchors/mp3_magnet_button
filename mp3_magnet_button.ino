@@ -48,17 +48,18 @@ int lastTrigger = 0; // This variable keeps track of which tune is playing
 // Magnet stuff
 #define hall A0
 int sensorVal;
+bool playState = false;
 
 void setup()
 {
   Serial.begin(9600);
 
-  /* Set up all trigger pins as inputs, with pull-ups activated: */
-  for (int i=0; i<TRIGGER_COUNT; i++)
-  {
-    pinMode(triggerPins[i], INPUT_PULLUP);
-  }
-  pinMode(stopPin, INPUT_PULLUP);
+  // /* Set up all trigger pins as inputs, with pull-ups activated: */
+  // for (int i=0; i<TRIGGER_COUNT; i++)
+  // {
+  //   pinMode(triggerPins[i], INPUT_PULLUP);
+  // }
+  // pinMode(stopPin, INPUT_PULLUP);
 
   initSD();  // Initialize the SD card
   initMP3Player(); // Initialize the MP3 Shield
@@ -70,49 +71,65 @@ void setup()
 void loop()
 {
   sensorVal = analogRead(hall);
+  // Serial.println(sensorVal);
 
   if (sensorVal < 200){
+    playState = true;
+
     if (MP3player.isPlaying() == false){
       uint8_t result = MP3player.playTrack(1);
     }
+  } else {
+    playState = false;
   }
+
+  if (millis() > 3000){
+    uint8_t result = MP3player.playTrack(1);
+
+  }
+
+  Serial.print("playState: ");
+  Serial.println(playState);
+
+  Serial.print("isPlaying(): ");
+  Serial.println(MP3player.isPlaying());
 
 
   
-  for (int i=0; i<TRIGGER_COUNT; i++)
-  {
-    if ((digitalRead(triggerPins[i]) == LOW) && ((i+1) != lastTrigger))
-    {
-      lastTrigger = i+1; // Update lastTrigger variable to current trigger
-      /* If another track is playing, stop it: */
-      if (MP3player.isPlaying())
-        MP3player.stopTrack();
+  // for (int i=0; i<TRIGGER_COUNT; i++)
+  // {
+  //   if ((digitalRead(triggerPins[i]) == LOW) && ((i+1) != lastTrigger))
+  //   {
+  //     lastTrigger = i+1; // Update lastTrigger variable to current trigger
+  //     /* If another track is playing, stop it: */
+  //     if (MP3player.isPlaying())
+  //       MP3player.stopTrack();
 
-      /* Use the playTrack function to play a numbered track: */
-      uint8_t result = MP3player.playTrack(lastTrigger);
-      // An alternative here would be to use the
-      //  playMP3(fileName) function, as long as you mapped
-      //  the file names to trigger pins.
+  //     /* Use the playTrack function to play a numbered track: */
+  //     uint8_t result = MP3player.playTrack(lastTrigger);
+  //     // An alternative here would be to use the
+  //     //  playMP3(fileName) function, as long as you mapped
+  //     //  the file names to trigger pins.
 
-      if (result == 0)  // playTrack() returns 0 on success
-      {
-        // Success
-      }
-      else // Otherwise there's an error, check the code
-      {
-        // Print error code somehow, someway
-      }
-    }
-  }
-  // After looping through and checking trigger pins, check to
-  //  see if the stopPin (A5) is triggered.
-  if (digitalRead(stopPin) == LOW)
-  {
-    lastTrigger = 0; // Reset lastTrigger
-    // If another track is playing, stop it.
-    if (MP3player.isPlaying())
-      MP3player.stopTrack();
-  }
+  //     if (result == 0)  // playTrack() returns 0 on success
+  //     {
+  //       // Success
+  //     }
+  //     else // Otherwise there's an error, check the code
+  //     {
+  //       // Print error code somehow, someway
+  //     }
+  //   }
+  // }
+  // // After looping through and checking trigger pins, check to
+  // //  see if the stopPin (A5) is triggered.
+  // if (digitalRead(stopPin) == LOW)
+  // {
+  //   lastTrigger = 0; // Reset lastTrigger
+  //   // If another track is playing, stop it.
+  //   if (MP3player.isPlaying())
+  //     MP3player.stopTrack();
+  // }
 }
 
 // initSD() initializes the SD card and checks for an error.
